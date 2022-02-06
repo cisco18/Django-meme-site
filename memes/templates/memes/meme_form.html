@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+
+    <p> <form action="" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form }}
+    <input type="submit" value="Submit">
+    <input type="submit" value="Cancel" onclick="window.location.href='{% url 'memes:all' %}';return false;">
+  </form>
+
+{% endblock %}

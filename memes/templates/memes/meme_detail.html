@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <a href="{% url 'memes:all' %}">All memes</a>
+
+
+        <div class="container"><a class="text-secondary"
+                                  style="text-decoration: none !important; font-size: 50px"
+                                  href="{% url 'memes:detail' meme.id %}">{{ meme.title }}  </a>
+        </div>
+
+    {% if  meme.picture %}
+        <ul>
+        <div id="overlay" class="overlay" style="text-align: center;">
+            {% if meme.picture %}
+                <img src="{{ meme.picture.url }}"
+                     alt="https://oko.press/images/2019/11/DUDA10-1510x1589.jpg">
+            {% endif %}
+
+
+        </div>
+        <div class="row">
+            {% if user.is_authenticated %}
+                <div class="col-1">
+                {% if not liked %}
+                    <form method="POST" action={% url 'memes:like' meme.id %}>
+                        {% csrf_token %}
+                        <button type="submit" name="meme_id" value="{{ meme.id }}"
+                                class="btn btn-block btn-primary"><i class="fa fa-thumbs-up">Like</i></button>
+                    </form>
+                {% else %}
+                    <form method="POST" action={% url 'memes:like' meme.id %}>
+                        {% csrf_token %}
+                        <button type="submit" name="meme_id" value="{{ meme.id }}"
+                                class="btn btn-block btn-danger"><i class="fa fa-thumbs-up">Dislike</i></button>
+                    </form>
+                {% endif %}
+            {% endif %}
+            </div>
+            <div class="col">
+                <p  style="font-size: 25px; color: dodgerblue"> Current score: {{ total_likes }} </p>
+            </div>
+        </div>
+    {% endif %}
+<div class="col">{{ meme.created_at }}
+Created by:  {{ meme.owner.username }}
+</div>
+
+{% if meme.owner == user %}
+    <a href="{% url 'memes:delete' meme.id %}"><i class="fa fa-trash"></i></a>
+    </ul>
+{% endif %}
+    </span>
+{% endblock %}

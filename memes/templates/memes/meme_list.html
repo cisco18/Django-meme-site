@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% block content %}
+    {% if meme_list is False %}
+        NO MEMES FOUND
+    {% elif meme_list %}
+        {% if user.is_authenticated %}
+            Hello {{ user.username }}
+        {% endif %}
+        <ul>
+            {% for meme in meme_list %}
+
+
+                {% if meme.picture %}
+                    <div>
+                    <div class="container"><a class="text-secondary"
+                                              style="text-decoration: none !important; font-size: 50px"
+                                              href="{% url 'memes:detail' meme.id %}">{{ meme.title }}  </a>
+                    </div>
+                    <img src="{{ meme.picture.url }}">
+                    <div class="row">
+
+                        {% if user.is_authenticated %}
+                            <div class="col-2">
+                            {% for meme_data in meme_likes %}
+                                {% if meme_data.id == meme.id %}
+                                    {% if meme_data.liked is False %}
+                                        <form method="POST" action={% url 'memes:like' meme.id %}>
+                                            {% csrf_token %}
+                                            <button type="submit" name="meme_id" value="{{ meme.id }}"
+                                                    class="btn btn-block btn-primary"><i
+                                                    class="fa fa-thumbs-up">Like</i>
+                                            </button>
+                                        </form>
+                                    {% else %}
+                                        <form method="POST" action={% url 'memes:like' meme.id %}>
+                                            {% csrf_token %}
+                                            <button type="submit" name="meme_id" value="{{ meme.id }}"
+                                                    class="btn btn-block btn-danger"><i
+                                                    class="fa fa-thumbs-up">Dislike</i>
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+
+                        </div>
+                        <div class="col">
+                            <p style="font-size: 25px; color: dodgerblue"> Current score:
+                                {% for meme_data in meme_likes %}
+                                    {% if meme_data.id == meme.id %}
+                                        {{ meme_data.total_likes }}
+                                    {% endif %}
+                                {% endfor %}</p>
+                        </div>
+                        <div class="col">
+                            {% if meme.owner == user %}
+                                <a style="text-decoration: none !important;"
+                                   href="{% url 'memes:delete' meme.id %}">Delete</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endif %}
+
+
+            </div>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>There are no memes in the database.</p>
+    {% endif %}
+
+{% endblock %}
