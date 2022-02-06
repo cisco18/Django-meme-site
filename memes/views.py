@@ -3,10 +3,11 @@ from memes.models import Meme
 from .forms import CreateMemeForm
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseRedirect
-from django.shortcuts import render, get_object_or_404
+from django.http import HttpResponseRedirect, JsonResponse
+from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy, reverse
 from django.utils import timezone
+
 
 
 @method_decorator(login_required, name='dispatch')
@@ -70,7 +71,8 @@ def MemeLikeView(request, pk):
     else:
         meme.likes.add(request.user)
         liked = True
-    return HttpResponseRedirect(reverse('memes:all'))
+
+    return redirect('memes:all')
 
 
 def MemeLikeDetailView(request, pk):
