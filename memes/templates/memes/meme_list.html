@@ -1,6 +1,5 @@
 {% extends 'base.html' %}
 
-{% load memes_extras %}
 
 {% block content %}
     {% if meme_list is False %}
@@ -14,6 +13,7 @@
 
 
                 {% if meme.picture.url %}
+
                     <div>
                     <div class="container"><a class="text-secondary"
                                               style="text-decoration: none !important; font-size: 50px"
@@ -26,23 +26,24 @@
                             <div class="col-2">
                             {% for meme_data in meme_likes %}
                                 {% if meme_data.id == meme.id %}
-                                    {% if meme_data.liked is False %}
-                                        <form method="POST" action={% url 'memes:like' meme.id %}>
-                                            {% csrf_token %}
+
+                                    <form method="POST" class='like-form' id='{{ meme.id }}'
+                                          action={% url 'memes:like' meme.id %}>
+                                        {% csrf_token %}
+                                        <input type="hidden" name="meme_id" value={{ meme.id }}>
+                                        {% if user not in meme.likes.all %}
                                             <button type="submit" name="meme_id" value="{{ meme.id }}" id="like-button"
-                                                class="btn btn-block btn-primary"><i
-                                                    class="fa fa-thumbs-up">Like</i>
+                                                    class="btn btn-block btn-info like-btn{{meme.id}} ">
+                                            Like
                                             </button>
-                                        </form>
-                                    {% else %}
-                                        <form method="POST" action={% url 'memes:like' meme.id %}>
-                                            {% csrf_token %}
+                                        {% else %}
                                             <button type="submit" name="meme_id" value="{{ meme.id }}" id="like-button"
-                                                class="btn btn-block btn-danger"><i
-                                                    class="fa fa-thumbs-up">Dislike</i>
+                                                    class="btn btn-block btn-info like-btn{{meme.id}}">
+                                                Unlike
                                             </button>
-                                        </form>
-                                    {% endif %}
+                                        {% endif %}
+                                    </form>
+
                                 {% endif %}
                             {% endfor %}
                         {% endif %}
@@ -52,7 +53,7 @@
                             <p style="font-size: 25px; color: dodgerblue"> Current score:
                                 {% for meme_data in meme_likes %}
                                     {% if meme_data.id == meme.id %}
-                                        {{ meme_data.total_likes }}
+                                        <p2 class="like-count{{meme.id}}">{{meme_data.total_likes}}</p2>
                                     {% endif %}
                                 {% endfor %}</p>
                         </div>
@@ -75,25 +76,44 @@
 
 
     <script>
-        $(document).on('click', '#like-button', function (e) {
-            e.preventDefault();
-            let url = form.attr("action")
+
+        $('.like-form').submit(function (e) {
+            e.preventDefault()
+
+            const meme_id = $(this).attr('id')
+
+            const likeText = $(`.like-btn${meme_id}`).text()
+            const trim = $.trim(likeText)
+
+            const url = $(this).attr('action')
+
+            let res;
+            const likes = $(`.like-count${meme_id}`).text()
+            const trimCount = parseInt(likes)
+            console.log(trim)
             $.ajax({
                 type: 'POST',
                 url: url,
                 data: {
-                    postid: $('#like-button').val(),
-                    csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
-                    action: 'post'
+                    'csrfmiddlewaretoken': $('input[name=csrfmiddlewaretoken]').val(),
+                    'meme_id': meme_id,
                 },
-                success: function (json) {
-                    document.getElementById("like_count").innerHTML = json['result']
-                },
-                error: function (xhr, errmsg, err) {
+                success: function (response) {
+                    if (trim === 'Unlike') {
+                        $(`.like-btn${meme_id}`).text('Like')
+                        res = trimCount - 1
+                    } else {
+                        $(`.like-btn${meme_id}`).text('Unlike')
+                        res = trimCount + 1
+                    }
 
+                    $(`.like-count${meme_id}`).text(res)
+                },
+                error: function (response) {
+                    console.log('error', response)
                 }
-            });
-        })
+            })
+        });
     </script>
 
 
