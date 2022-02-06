@@ -1,4 +1,7 @@
 {% extends 'base.html' %}
+
+{%  load memes_extras %}
+
 {% block content %}
     {% if meme_list is False %}
         NO MEMES FOUND
@@ -10,7 +13,7 @@
             {% for meme in meme_list %}
 
 
-                {% if meme.picture %}
+                {% if meme.picture.url|is_image_in %}
                     <div>
                     <div class="container"><a class="text-secondary"
                                               style="text-decoration: none !important; font-size: 50px"
