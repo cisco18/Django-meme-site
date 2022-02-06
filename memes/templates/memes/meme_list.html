@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{%  load memes_extras %}
+{% load memes_extras %}
 
 {% block content %}
     {% if meme_list is False %}
@@ -13,7 +13,7 @@
             {% for meme in meme_list %}
 
 
-                {% if meme.picture.url|is_image_in %}
+                {% if meme.picture.url %}
                     <div>
                     <div class="container"><a class="text-secondary"
                                               style="text-decoration: none !important; font-size: 50px"
@@ -29,16 +29,16 @@
                                     {% if meme_data.liked is False %}
                                         <form method="POST" action={% url 'memes:like' meme.id %}>
                                             {% csrf_token %}
-                                            <button type="submit" name="meme_id" value="{{ meme.id }}"
-                                                    class="btn btn-block btn-primary"><i
+                                            <button type="submit" name="meme_id" value="{{ meme.id }}" id="like-button"
+                                                class="btn btn-block btn-primary"><i
                                                     class="fa fa-thumbs-up">Like</i>
                                             </button>
                                         </form>
                                     {% else %}
                                         <form method="POST" action={% url 'memes:like' meme.id %}>
                                             {% csrf_token %}
-                                            <button type="submit" name="meme_id" value="{{ meme.id }}"
-                                                    class="btn btn-block btn-danger"><i
+                                            <button type="submit" name="meme_id" value="{{ meme.id }}" id="like-button"
+                                                class="btn btn-block btn-danger"><i
                                                     class="fa fa-thumbs-up">Dislike</i>
                                             </button>
                                         </form>
@@ -72,5 +72,29 @@
     {% else %}
         <p>There are no memes in the database.</p>
     {% endif %}
+
+
+    <script>
+        $(document).on('click', '#like-button', function (e) {
+            e.preventDefault();
+            let url = form.attr("action")
+            $.ajax({
+                type: 'POST',
+                url: url,
+                data: {
+                    postid: $('#like-button').val(),
+                    csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
+                    action: 'post'
+                },
+                success: function (json) {
+                    document.getElementById("like_count").innerHTML = json['result']
+                },
+                error: function (xhr, errmsg, err) {
+
+                }
+            });
+        })
+    </script>
+
 
 {% endblock %}
